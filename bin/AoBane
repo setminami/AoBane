@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require '../lib/AoBane/cui'
+AoBane::CUI.run(ARGV) or exit(1)
