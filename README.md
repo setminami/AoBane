@@ -69,4 +69,5 @@ like this
 > (TM) &trade;
 
 ##How to Install
-Under costructing...wait a minutes
+Just try 
+`sudo gem install AoBane`
