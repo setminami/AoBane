@@ -9,6 +9,9 @@ The points of difference are
 * You can use font TAG like this-> `*[blablabla](color|font faces#font size)`
   * *e.g.,* `*[blablabla](red|Times,Arial#5) -expand-> <font color="red" face="Times,Arial" size="5">blablabla</font>`
     - And I know that font TAG was duplicated in HTML5...
+* You can use MathML by code LaTeX string. Use firefox renderer because of MathML specification.
+  * like this. `\{x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}\} -expand-> <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>x</mi><mo>=</mo><mfrac><mrow><mo>-</mo><mi>b</mi><mo>&pm;</mo><msqrt><mrow><msup><mi>b</mi><mn>2</mn></msup><mo>-</mo><mn>4</mn><mi>a</mi><mi>c</mi></mrow></msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></math>`
+  
 * You can use HTML special character by simple way.
 
 like this

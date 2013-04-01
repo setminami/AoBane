@@ -38,7 +38,7 @@ require 'logger'
 require 'strscan'
 require 'stringio'
 require 'uri'
-
+require "math_ml/string"
 
 module AoBane
 	VERSION = '0.01'
@@ -520,6 +520,11 @@ module AoBane
 			if $4.nil? then '' else $4.delete('#') end + '">' +
 			$1 + '</font>'
 			}
+                        
+                        #Insert by set.minami 2013-04-01
+                        text.gsub!(/\\{(.*?)\\}/){ |match|
+                          if $1.nil? then '' else $1.to_mathml end
+                        }
 			#Insert by set.minami
 			
 			# Filter HTML if we're asked to do so
