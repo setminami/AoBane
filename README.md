@@ -2,6 +2,7 @@ AoBane The MarkDown Core Engine
 ======
 
 Powered By BlueFeather 
+See also [AoBane development memo](https://github.com/setminami/AoBane/wiki/development-memo).
 
 ##What's This and What You Can...
 This codes are extended from BlueFeather.<br>
