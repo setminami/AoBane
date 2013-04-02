@@ -41,8 +41,8 @@ require 'uri'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.01'
-	VERSION_NUMBER = 0.01
+	VERSION = '0.0.4'
+	VERSION_NUMBER = 0.04
 	RELEASE_DATE = '2013-03-30'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 	
@@ -510,8 +510,7 @@ module AoBane
 			@log.debug "Normalized line-endings: %p" % text
 	
 			#Insert by set.minami 2013-03-30
-			text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(#.*?)*\)/){
-			|match|
+			text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(#.*?)*\)/){|match|
 			'<font color="' + 
 			if $2.nil? then '' else $2 end  +'" ' +
 			'face="' + 
