@@ -486,6 +486,45 @@ module AoBane
 		# AoBane Extension: add id to each header, for toc and anchors. (default: true)
 		attr_accessor :use_header_id
 
+
+                ### Insert by set.minami ###########################################
+                ### Return a caluculated section number.############################
+                MAX_H = 6
+                def calcSectionNo(startNo, range, cue, size, str)
+                  numberStr = Array.new(6,1)
+                  line = ""
+                  number = ""
+                  headNo = startNo.to_i + size - 1
+                  if (headNo > MAX_H) then 
+                    puts("AoBane Syntax Error: Headder shortage!") 
+                    raise SyntaxError,"Headder shortage!"
+                  else
+                    case size
+                    when 1...6 then
+                      @log.debug cue
+                      numberStr.each_with_index{ |item,index|
+                        if index < (size-1).to_i then number = insertNumber(index,number,item,cue) end
+                        if index == (size-1).to_i then
+                          number = insertNumber(index,number,item,cue)
+                          cue[index] += 1
+                          @log.debug number
+                          break
+                        end #if
+                      }
+                    else
+                      puts("AoBane Syntax Error: Header Number Overflow!")
+                      raise SyntaxError,"Header Number Overflow!"
+                    end #case
+                    h = "#"
+                    line = h*size.to_i + number + str
+                  end #if...else
+                 return line
+                end #def
+
+                def insertNumber(index,number,item,cue)
+                  return number << (item + cue[index]).to_s + '.'
+                end
+
 		### Render Markdown-formatted text in this string object as HTML and return
 		### it. The parameter is for compatibility with RedCloth, and is currently
 		### unused, though that may change in the future.
@@ -522,7 +561,7 @@ module AoBane
 
 			#Insert by set.minami 2013-04-03
 			nrange = []
-                        numberCue = Array.new(6,1)
+                        numberCue = Array.new(6,0)
                         preproc = Marshal.load(Marshal.dump(text))
                         text.clear
                         html_text_number = 0
@@ -549,23 +588,13 @@ module AoBane
                           #calculate numbering
                           range = nrange.max.to_i - nrange.min.to_i
                           line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
-                              case $1.size
-                              when 1
-                                match = 
-                                  '<H' + (nrange.min.to_i+$1.size-1).to_s + '>' + 
-                                  numberCue[$1.size.to_i-1].to_s + '.' +
-                                  $2 + '<H' + (nrange.min.to_i+$1.size-1).to_s + '>'
-                                p match
-                                numberCue[$1.size.to_i-1] += 1
-                              else
-                                puts "else"
-                              end
+                            line = calcSectionNo(nrange.min,range,numberCue,$1.size,$2)
                           }
                        text << line
                        p nrange.minmax
                        rescue => e
-                          puts "l.#{html_text_number}:#{line.chomp} haven't adopted" 
-                          puts e
+                          puts "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
+                          p e                          
                        end
                   }
 
