@@ -4,7 +4,7 @@
 # Author of Original BlueFeather: Dice <tetradice@gmail.com>
 # Remaker: set.minami <set.minami@gmail.com>
 # Website: https://github.com/setminami/AoBane/
-# License: GPL version 2 or later
+# License: MIT
 #
 #  If you want to know better about AoBane, See the Website.
 #
@@ -20,17 +20,26 @@
 # Orignal BlueCloth:
 #   Copyright (c) 2004 The FaerieMUD Consortium.
 #
+# Original BlueFeather:
+#   Copyright (c) 2013 Dice
+#
 # AoBane:
 #   Copyright (c) 2013 Set.Minami
 #
-# AoBane is free software; you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
-#
-# AoBane is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+# software and associated documentation files (AoBane), to deal in the Software 
+# without restriction, including without limitation the rights to use, copy, modify, 
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+# permit persons to whom the Software is furnished to do so, subject to the following 
+# conditions:
+# The above copyright notice and this permission notice shall be included in all copies or 
+# substantial portions of the Software.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+# PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT 
+# OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+# OTHER DEALINGS IN THE SOFTWARE.
 
 
 require 'digest/md5'
@@ -38,6 +47,7 @@ require 'logger'
 require 'strscan'
 require 'stringio'
 require 'uri'
+require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
@@ -487,45 +497,9 @@ module AoBane
 		attr_accessor :use_header_id
 
 
-                ### Insert by set.minami ###########################################
-                ### Return a caluculated section number.############################
-                MAX_H = 6
-                def calcSectionNo(startNo, range, cue, size, str)
-                  numberStr = Array.new(6,1)
-                  line = ""
-                  number = ""
-                  headNo = startNo.to_i + size - 1
-                  if (headNo > MAX_H) then 
-                    puts("AoBane Syntax Error: Headder shortage!") 
-                    raise SyntaxError,"Headder shortage!"
-                  else
-                    case size
-                    when 1...6 then
-                      @log.debug cue
-                      numberStr.each_with_index{ |item,index|
-                        if index < (size-1).to_i then number = insertNumber(index,number,item,cue) end
-                        if index == (size-1).to_i then
-                          number = insertNumber(index,number,item,cue)
-                          cue[index] += 1
-                          @log.debug number
-                          break
-                        end #if
-                      }
-                    else
-                      puts("AoBane Syntax Error: Header Number Overflow!")
-                      raise SyntaxError,"Header Number Overflow!"
-                    end #case
-                    h = "#"
-                    line = h*size.to_i + number + str
-                  end #if...else
-                 return line
-                end #def
-
-                def insertNumber(index,number,item,cue)
-                  return number << (item + cue[index]).to_s + '.'
-                end
-
-		### Render Markdown-formatted text in this string object as HTML and return
+ 
+ 
+ 		### Render Markdown-formatted text in this string object as HTML and return
 		### it. The parameter is for compatibility with RedCloth, and is currently
 		### unused, though that may change in the future.
 		def parse_text(source, rs = nil)
@@ -561,15 +535,18 @@ module AoBane
 
 			#Insert by set.minami 2013-04-03
 			nrange = []
-                        numberCue = Array.new(6,0)
+                        departure = 1
                         preproc = Marshal.load(Marshal.dump(text))
                         text.clear
                         html_text_number = 0
 			preproc.lines { |line|
                         html_text_number += 1
 			begin
-			  line.gsub!(/^\{nrange:(.*?)\}/){ |match|
-			    if /[hH]([1-6])\-[hH]([1-6])/ =~ match
+			  line.gsub!(/^\{nrange:(.*?)(;\d+){0,1}\}/){ |match|
+                            depNum = $2.delete(';').to_i
+                            departure =  
+                                if depNum > 0 then depNum else 1 end
+			    if /[hH]([1-6])\-[hH]([1-6])/ =~ $1
 			      nrange.push($1)
 			      nrange.push($2)
                               if nrange.size > 2 then
@@ -588,13 +565,17 @@ module AoBane
                           #calculate numbering
                           range = nrange.max.to_i - nrange.min.to_i
                           line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
-                            line = calcSectionNo(nrange.min,range,numberCue,$1.size,$2)
+                            p "*********************************"
+                            p line
+                            line = Utilities.
+                              calcSectionNo(nrange.min,range,$1.size,departure,$2)
+                            p "*********************************"
                           }
                        text << line
-                       p nrange.minmax
+                       @log.debug nrange.minmax
                        rescue => e
-                          puts "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
-                          p e                          
+                          @log.warn "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
+                          @log.warn e                          
                        end
                   }
 
