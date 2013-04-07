@@ -7,15 +7,18 @@ require 'singleton'
 
 S_SLOT = 0
 N_SLOT = 1
+C_SLOT = 2
 module Utilities
 
-### Return a caluculated section number.############################
+### Return a caluculated section number and string.############################
 MAX_H = 6
 @@log = Logger.new(STDOUT)
 @@log.level = Logger::DEBUG
   def calcSectionNo(startNo, range, size, dep=1, str)
     i = dep.to_i
-    numberStr = [["%",i],["%%",i],["%%%",i],["%%%%",i],["%%%%%",i],["%%%%%%",i]]
+    counter = 0
+    numberStr = [["%",i,counter],["%%",i,counter],["%%%",i,counter],
+                 ["%%%%",i,counter],["%%%%%",i,counter],["%%%%%%",i,counter]]
     line = ""
     number = ""
     headNo = startNo.to_i + size -1
@@ -24,8 +27,7 @@ MAX_H = 6
       @@log.error("AoBane Syntax Error: Headder shortage!") 
       raise SyntaxError,"Headder shortage!"
     else
-     #k = 0 #??? cannot use each.with_index here?
-      numberStr.each_with_index{|item,k| #h1 to h6
+      (1..size).each_with_index{|k| #h1 to h6
         @@log.debug "k #{k},hn #{headNo},s #{size},sN #{startNo},sos #{stack.sizeofStack}"
        if p (k < headNo) then
          p "+++ #{k},#{stack.sizeofStack}"
@@ -36,24 +38,24 @@ MAX_H = 6
          if stack.sizeofStack == 0 then
            stack.push(numberStr[k-1])
          end
-         p "### #{stack.evalStackTop[S_SLOT].size} #{numberStr[k-1][S_SLOT].size}"
-         if stack.evalStackTop[S_SLOT].size < numberStr[k-1][S_SLOT].size then
+
+         #p "### #{stack.evalStackTop[S_SLOT].size} #{numberStr[k-1][S_SLOT].size}"
+         if p (stack.evalStackTop[S_SLOT].size < numberStr[k-1][S_SLOT].size) then
            p "==="
            stack.push(numberStr[k])
-         elsif stack.evalStackTop[S_SLOT].size > numberStr[k-1][S_SLOT].size then
+         elsif p (stack.evalStackTop[S_SLOT].size > numberStr[k-1][S_SLOT].size) then
            p "!!!!"
            stack.pop
-           stack.incSectionNo
-         elsif stack.evalStackTop[S_SLOT].size == numberStr[k-1][S_SLOT].size then
+           #stack.incSectionNo
+         elsif p (stack.evalStackTop[S_SLOT].size == numberStr[k-1][S_SLOT].size) then
            p "----"
-           number = stack.insertNumber
            #stack.incSectionNo
          end
-         break
+         #break
        else
          p "~~~~"
          stack.push(numberStr[k])
-       end #if
+       end #if...elsif 
       stack.dump
      }
 =begin
@@ -62,10 +64,14 @@ MAX_H = 6
       raise SyntaxError,"Header Number Overflow!"
     end #case
 =end
-      p ">> #{number}"
-      h = "#"
-      line = h*size.to_i + number + str
   end #if...else
+    p "$$$$"
+    number = stack.insertNumber
+    h = "#"
+    line = h*headNo.to_i + number + str
+    stack.evalStackTop[C_SLOT] += 1
+    p stack.dump
+    p ">> #{line}"
   return line
 end #def
  
@@ -78,15 +84,19 @@ class Stack
   @@log = Logger.new(STDOUT)
   @@log.level = Logger::DEBUG
 
+
+
   def initialize
     @stack = []
+    @sp = 0
   end
 
   def push(pair)
     @@log.debug("#{__LINE__} push #{pair}")
-    if (@stack.size + 1) < MAX_STACK then
+    if p (@stack.size + 1) < MAX_STACK then
       @stack.push(pair)
-      @@log.debug "#{@stack}"
+      @sp += 1
+      @@log.debug @stack
     else
       raise SyntaxError,"Stack Over Flow!"
     end
@@ -94,7 +104,7 @@ class Stack
   
   def pop
     @@log.debug("#{__LINE__} pop")
-    if (@stack.size - 1) >= 0 then return @stack.pop
+    if (@stack.size - 1) >= 0 then @sp -= 1;return @stack.pop
     else
       raise SyntaxError,"Stack Under Flow!"
     end
@@ -115,32 +125,36 @@ class Stack
 
 
   def insertNumber
+
     str = ""
-    p "$$$$#{@stack.size}"
     #range = 0..@stack.size 
     @stack.each { |item|
-      str << item[N_SLOT].to_s + '.' 
+      if item == @stack.last then
+        str << (item[N_SLOT] + item[C_SLOT]).to_s + '.'
+      else
+        str << (item[N_SLOT]).to_s + '.'
+      end
       @@log.debug str
     }
     return str
   end
   
-  def incSectionNo
-    item = @stack.pop
-    item[N_SLOT] += 1
-    @stack.push(item)
-  end
-
   def evalStackTop
     return @stack.last
   end
-  
+
+  def getSp
+    if @sp >= 0 then return @sp 
+    else raise FatalError,"SP is negative!"
+    end
+  end
+
   def sizeofStack
     return @stack.size
   end
 
   def dump
-    puts("Stack DUMP :#{@stack}")
+    @@log.debug("Stack DUMP :#{@stack}")
   end
 
 end
