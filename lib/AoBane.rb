@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.0.4'
-	VERSION_NUMBER = 0.0004
-	RELEASE_DATE = '2013-04-03'
+	VERSION = '0.1.0'
+	VERSION_NUMBER = 0.0100
+	RELEASE_DATE = '2013-04-08'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -563,13 +563,15 @@ module AoBane
                             if $1.nil? then '' else $1.to_mathml end
                           }
                           #calculate numbering
-                          range = nrange.max.to_i - nrange.min.to_i
+                          range = nrange[1].to_i - nrange[0].to_i
+                          if range < 0 then 
+                            p "AoBane Syntax Error:Header range is WRONG!" +
+                              "@ l.#{html_text_number}";exit(-1)
+                            raise FatalError,"AoBane Syntax Error:Header range is WRONG!"
+                          end
                           line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
-                            p "*********************************"
-                            p line
                             line = Utilities.
                               calcSectionNo(nrange.min,range,$1.size,departure,$2)
-                            p "*********************************"
                           }
                        text << line
                        @log.debug nrange.minmax
