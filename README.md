@@ -12,7 +12,19 @@ The points of difference are
     - And I know that font TAG was duplicated in HTML5...
 * You can use MathML by to code LaTeX string surrounding `\TeX{` and `\TeX}`. Use firefox renderer because of MathML specification.
   * like this. `\TeX{x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}\TeX} -expand-> <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>x</mi><mo>=</mo><mfrac><mrow><mo>-</mo><mi>b</mi><mo>&pm;</mo><msqrt><mrow><msup><mi>b</mi><mn>2</mn></msup><mo>-</mo><mn>4</mn><mi>a</mi><mi>c</mi></mrow></msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></math>`
-  
+
+* You can use Auto Numbering Title by seaquential '%' anotation.
+  * *e.g.*,like below
+<pre><code>
+{nrange:h2-h5} <- this means header number range is h2-h5.
+% foo1 -> <h2 id=xxx>1. foo1</h2>
+%% foo1.1 -> <h3 id=xxx>1.1. foo1.1</h3>
+%% foo1.2 -> <h3 id=xxx>1.2. foo1.2</h3>
+%%% foo1.2.1 -> <h4 id=xxx>1.2.1 foo1.2.1</h4>
+% foo2 -> <h2 id=xxx>2. foo2</h2>
+......................
+</code></pre>
+
 * You can use HTML special character by simple way.
 
 like this
