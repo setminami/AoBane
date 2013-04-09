@@ -51,8 +51,8 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.1'
-	VERSION_NUMBER = 0.0101
+	VERSION = '0.1.0'
+	VERSION_NUMBER = 0.0100
 	RELEASE_DATE = '2013-04-08'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
@@ -659,7 +659,7 @@ module AoBane
 			  else
 			  line.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
 				     \>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|
-				     \\&|\(c\)|\(R\)|\(SS\)|\(TM\)/,
+				     \\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in/,
 				"\-\-" => "&mdash;",
 				"<=" => "&hArr;",
 				"<\->" => "&harr;",
@@ -688,7 +688,8 @@ module AoBane
 				"\(c\)" => "&copy;",
 				"\(R\)" =>"&reg;",
 				"\(SS\)" => "&sect;",
-				"\(TM\)" => "&trade;")
+				"\(TM\)" => "&trade;",
+                                "!in" => "&notin;")
 			output << line
 			end
 			}
