@@ -16,7 +16,7 @@ $MAX_H = 6
 @@log.level = Logger::WARN
 
 ### Return a caluculated section number and string.############################
-  def calcSectionNo(startNo, range, size, dep, str)
+  def calcSectionNo(startNo=1, range=0, size=0, dep=1, str='')
     stack = Stack.instance
     i = dep.to_i
     counter = 0

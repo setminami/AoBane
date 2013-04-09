@@ -554,7 +554,6 @@ module AoBane
                                 nrange.pop
                                 raise "Syntax Error!" 
                               end
-                              match = ""
 			    end
 			    next
                           }
@@ -564,6 +563,7 @@ module AoBane
                           }
                           #calculate numbering
                           range = nrange[1].to_i - nrange[0].to_i
+                          if range == 0 then range = 1 end
                           if range < 0 then 
                             p "AoBane Syntax Error:Header range is WRONG!" +
                               "@ l.#{html_text_number}";exit(-1)
