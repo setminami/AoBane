@@ -84,6 +84,7 @@ like this
 
 > (TM) &trade;
 
+> !in &notin;
 ##How to Install
 Just try 
 `sudo gem install AoBane`
