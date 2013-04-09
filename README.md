@@ -85,11 +85,14 @@ like this
 > (TM) &trade;
 
 > !in &notin;
+
+
 ##How to Install
 Just try 
 `sudo gem install AoBane`
+
 ## How to use minimum
 If you want to write forcely, neglect your .md file's timestamp.
-`AoBane --force`
+`AoBane --force yourfile.md`
 This way is inheritated from BlueFeather.
 
