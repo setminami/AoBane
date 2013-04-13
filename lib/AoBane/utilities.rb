@@ -16,7 +16,7 @@ $MAX_H = 6
 @@log.level = Logger::WARN
 
 ###paling proccessing##########################################################
-$startDivMark = '^\|\-:b=(\d+?)\s(\w+?\s\w+?\s)w=(\d+?)\srad=(\d+?)\-+\|'
+$startDivMark = '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)w=(\d+?)\srad=(\d+?)\-+\|'
 $endDivMark =  '\|\-+\|'
 
 def prePaling(text)

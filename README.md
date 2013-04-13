@@ -37,7 +37,7 @@ The points of difference are
 This syntax expand like below:
 <pre><code>
 &lt;div style="border:2px solid gray ; width:300px;border-radius:10px;"&gt;
-&lt;h3 id="xxx"&gt;foo&lt/h3&gt;
+&lt;h3 id="xxx"&gt;foo&lt;/h3&gt;
 bar
 &lt;/div&gt;
 </code></pre>
