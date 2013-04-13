@@ -15,6 +15,44 @@ $MAX_H = 6
 @@log = Logger.new(STDOUT)
 @@log.level = Logger::WARN
 
+###paling proccessing##########################################################
+$startDivMark = '^\|\-:b=(\d+?)\s(\w+?\s\w+?\s)w=(\d+?)\srad=(\d+?)\-+\|'
+$endDivMark =  '\|\-+\|'
+
+def prePaling(text)
+  output = text.split("\n")
+  output.each_with_index{|line,index|
+    if /#{$startDivMark}/ =~ line then
+    loop do
+        index += 1
+        if /#{$endDivMark}/ =~ output[index] then
+          break
+        elsif /^\|(.*)\s+\|/ =~ output[index] then
+          output[index] = $1
+        end
+    end
+  end #if
+  }
+  return output.join("\n")
+end #def prePaling
+
+def postPaling(text)
+  output = text.split("\n")
+  output.each_with_index{|line,index|
+    if /#{$startDivMark}/ =~ line then
+      output[index] = '<div style="border:' + $1 + 'px ' + $2 + 
+                             '; width:' + $3 + 'px;border-radius:' + $4 + 'px;">'
+      loop do
+        index += 1
+        if /#{$endDivMark}/ =~ output[index] then
+          output[index] = '</div>'
+          break
+        end
+      end
+    end
+  }
+  return output.join("\n")
+end #def postPailing
 ### Return a caluculated section number and string.############################
   def calcSectionNo(startNo=1, range=0, size=0, dep=1, str='')
     stack = Stack.instance
@@ -64,6 +102,8 @@ $MAX_H = 6
 end #def
  
 module_function :calcSectionNo
+module_function :prePaling
+module_function :postPaling
 #############################################################################
 end
 

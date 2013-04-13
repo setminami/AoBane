@@ -532,12 +532,15 @@ module AoBane
 			if $4.nil? then '' else $4.delete('#') end + '">' +
 			$1 + '</font>'
 			}
+                        #Insert by set.minami 2013-04-13
+                        text = Utilities::prePaling(text)
 
 			#Insert by set.minami 2013-04-03
 			nrange = []
                         departure = 1
                         preproc = Marshal.load(Marshal.dump(text))
                         text.clear
+                        texParser = MathML::LaTeX::Parser.new
                         html_text_number = 0
 			preproc.lines { |line|
                         html_text_number += 1
@@ -558,9 +561,11 @@ module AoBane
 			    next
                           }
                           #Insert by set.minami 2013-04-01
-                          line.gsub!(/\\TeX{(.*?)\\TeX}/){ |match|
-                            if $1.nil? then '' else $1.to_mathml end
+                          texTag = '\\\\TeX'
+                          line.gsub!(/#{texTag}\{(.+?)#{texTag}\}/){
+                            texParser.parse($1,false).to_s
                           }
+                          @log.debug line                          
                           #calculate numbering
                           range = nrange[1].to_i - nrange[0].to_i
                           if range == 0 then range = 1 end
@@ -581,7 +586,7 @@ module AoBane
                        end
                   }
 
-			#Insert by set.minami
+                  #Insert by set.minami
 
 			# Filter HTML if we're asked to do so
 			if self.filter_html
@@ -646,57 +651,61 @@ module AoBane
 				end
 			end
 
-			#Insert by set.minami 2013-03-30
-			output = []
-			text.lines {|line|
-			  if /<pre><code>/ =~ line
-			    output << line
-			    next
-			    until /<\/code><\/pre>/ =~ line
-			      output << line
-			      next
-			    end
-			  else
-			  line.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
+                  #Insert by Set.Minami 2013-04-13
+                  text = Utilities::postPaling(text)
+                  
+                  #Insert by set.minami 2013-03-30
+                  output = []
+                  text.lines {|line|
+                    if /<pre><code>/ =~ line then
+                      output << line
+                      next
+                      until /<\/code><\/pre>/ =~ line
+                        output << line
+                        next
+                      end
+                    else
+                      line.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
 				     \>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|
 				     \\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in/,
-				"\-\-" => "&mdash;",
-				"<=" => "&hArr;",
-				"<\->" => "&harr;",
-				"\->" =>"&rarr;",
-				"<\-" =>"&larr;",
-				"=>" => "&rArr;",
-				"<=" => "&lArr;",
-				"\|\|\^" => "&uArr;",
-				"\|\|\/" => "&dArr;",
-				"\|\/" => "&darr;",
-				"\|\^" => "&uarr;",
-				">>" => "&raquo;",
-				"\<\<" => "&laquo;",
-				"+_" => "&plusmn;",
-				"!=" => "&ne;",
-				"~~" => "&asymp;",
-				"~=" => "&cong;",
-				"<_" => "&le;",
-				">_" => "&ge",
-				"\|FA" => "&forall;",
-				"\|EX" => "&exist;",
-				"\|=" => "&equiv;",
-				"\(+\)" => "&oplus",
-				"\(x\)" => "&otimes;",
-				"\\&" =>"&amp;",
-				"\(c\)" => "&copy;",
-				"\(R\)" =>"&reg;",
-				"\(SS\)" => "&sect;",
-				"\(TM\)" => "&trade;",
-                                "!in" => "&notin;")
-			output << line
-			end
-			}
-			return output
-			#Insert by set.minami
-			#return text
-
+                                 "\-\-" => "&mdash;",
+                                 "<=" => "&hArr;",
+                                 "<\->" => "&harr;",
+                                 "\->" =>"&rarr;",
+                                 "<\-" =>"&larr;",
+                                 "=>" => "&rArr;",
+                                 "<=" => "&lArr;",
+                                 "\|\|\^" => "&uArr;",
+                                 "\|\|\/" => "&dArr;",
+                                 "\|\/" => "&darr;",
+                                 "\|\^" => "&uarr;",
+                                 ">>" => "&raquo;",
+                                 "\<\<" => "&laquo;",
+                                 "+_" => "&plusmn;",
+                                 "!=" => "&ne;",
+                                 "~~" => "&asymp;",
+                                 "~=" => "&cong;",
+                                 "<_" => "&le;",
+                                 ">_" => "&ge",
+                                 "\|FA" => "&forall;",
+                                 "\|EX" => "&exist;",
+                                 "\|=" => "&equiv;",
+                                 "\(+\)" => "&oplus",
+                                 "\(x\)" => "&otimes;",
+                                 "\\&" =>"&amp;",
+                                 "\(c\)" => "&copy;",
+                                 "\(R\)" =>"&reg;",
+                                 "\(SS\)" => "&sect;",
+                                 "\(TM\)" => "&trade;",
+                                 "!in" => "&notin;")
+                      output << line
+                    end
+                  }
+                  
+                  return output
+                  #Insert by set.minami
+                  #return text
+                  
 		end
 
 		alias parse parse_text
