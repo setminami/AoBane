@@ -27,8 +27,10 @@ def prePaling(text)
         index += 1
         if /#{$endDivMark}/ =~ output[index] then
           break
-        elsif /^\|(.*)\s+\|/ =~ output[index] then
-          output[index] = $1
+        elsif /^\|(\#{1,6})\s*(.*)\|/ =~ output[index] then
+          output[index] = '#'*$1.size + '$2'
+        elsif /^\|(.*)\s*\|/ =~ output[index] then
+          output[index] = '<p>' + $1 + '</p>'
         end
     end
   end #if

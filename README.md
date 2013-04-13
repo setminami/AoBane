@@ -41,7 +41,11 @@ This syntax expand like below:
 bar
 &lt;/div&gt;
 </code></pre>
-
+  * You have to start with
+    - first line |-: and b=[widthof borde line(px)] [Type of line] [Color of line] w=[width(px)] rad=[border radius ratio]--...|
+    - second and later lines surround with | and spaces
+  * And end with
+    - last of border is to write |-...-|
 
 * You can use HTML special character by simple way.
 
