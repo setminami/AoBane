@@ -25,6 +25,21 @@ The points of difference are
 ......................
 </code></pre>
 
+* You can use <div> paling.
+  * Write like below:
+
+<pre><code>
+|-:b=2 solid gray w=300 rad=10-----------------|
+|### foo                                       |
+|bar                                           |
+|----------------------------------------------|
+</code></pre>
+This syntax expand like below:
+<pre><code>
+<div style="border:2px solid gray ; width:300px;border-radius:10px;">
+<h3 id="xxx">foo</h3>
+</div>
+</code></pre>
 * You can use HTML special character by simple way.
 
 like this
