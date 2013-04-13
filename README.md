@@ -46,7 +46,7 @@ bar
     - second and later lines surround with | and spaces
   * And end with
     - last of border is to write |-...-|
-
+  * Header elements in the box can be hashed and joined as one of Table of Contents 
 * You can use HTML special character by simple way.
 
 like this
