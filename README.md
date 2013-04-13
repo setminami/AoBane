@@ -7,8 +7,8 @@ See also [AoBane development memo](https://github.com/setminami/AoBane/wiki/deve
 ##What's This and What You Can...
 This codes are extended from BlueFeather.<br>
 The points of difference are
-* You can use font TAG like this-> `*[blablabla](color|font faces#font size)`
-  * *e.g.,* `*[blablabla](red|Times,Arial#5) -expand-> <font color="red" face="Times,Arial" size="5">blablabla</font>`
+* You can use font TAG like this-> `*[blablabla](color|font faces/font size)`
+  * *e.g.,* `*[blablabla](red|Times,Arial/5) -expand-> <font color="red" face="Times,Arial" size="5">blablabla</font>`
     - And I know that font TAG was duplicated in HTML5...
 * You can use MathML by to code LaTeX string surrounding `\TeX{` and `\TeX}`. Use firefox renderer because of MathML specification.
   * like this. `\TeX{x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}\TeX} -expand-> <math xmlns='http://www.w3.org/1998/Math/MathML' display='inline'><mi>x</mi><mo>=</mo><mfrac><mrow><mo>-</mo><mi>b</mi><mo>&pm;</mo><msqrt><mrow><msup><mi>b</mi><mn>2</mn></msup><mo>-</mo><mn>4</mn><mi>a</mi><mi>c</mi></mrow></msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></math>`

@@ -523,13 +523,13 @@ module AoBane
 			@log.debug "Normalized line-endings: %p" % text
 
 			#Insert by set.minami 2013-03-30
-			text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(#.*?)*\)/){|match|
+			text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(\/.*?)*\)/){|match|
 			'<font color="' +
 			if $2.nil? then '' else $2 end	+'" ' +
 			'face="' +
 			if $3.nil? then '' else $3.delete('|') end + '" ' +
 			'size="' +
-			if $4.nil? then '' else $4.delete('#') end + '">' +
+			if $4.nil? then '' else $4.delete('/') end + '">' +
 			$1 + '</font>'
 			}
                         #Insert by set.minami 2013-04-13
