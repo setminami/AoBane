@@ -51,8 +51,8 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.5'
-	VERSION_NUMBER = 0.0105
+	VERSION = '0.1.6'
+	VERSION_NUMBER = 0.0106
 	RELEASE_DATE = '2013-04-15'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
