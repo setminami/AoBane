@@ -16,7 +16,9 @@ $MAX_H = 6
 @@log.level = Logger::WARN
 
 ###paling proccessing##########################################################
-$startDivMark = '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)w=(\d+?)\srad=(\d+?)\-+\|'
+  $startDivMark = 
+    '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)(w=(\w+?)\s){0,1}(h=(\w+?)\s){0,1}(bg=(\w+?)\s){0,1}' + 
+    'rad=(\w+?)\-+\|'
 $endDivMark =  '\|\-+\|'
 
 def prePaling(text)
@@ -38,12 +40,24 @@ def prePaling(text)
   return output.join("\n")
 end #def prePaling
 
+def isDigit(str)
+  if /\d+/ =~ str then 
+    return true
+  else
+    return false
+  end
+end
+
 def postPaling(text)
   output = text.split("\n")
   output.each_with_index{|line,index|
     if /#{$startDivMark}/ =~ line then
-      output[index] = '<div style="border:' + $1 + 'px ' + $2 + 
-                             '; width:' + $3 + 'px;border-radius:' + $4 + 'px;">'
+      output[index] = '<div style="border:' + $1 + 'px ' + $2 + ';' +
+        if $4.nil? then '' else 'width:' + if Utilities::isDigit($4) then $4 + 'px;' else $4 + ';'  end end  + 
+        if $6.nil? then '' else 'height:' + if Utilities::isDigit($6) then $6 + 'px;' else $6 + ';' end end + 
+        if $8.nil? then '' else 'background-color:' + $8 + ';' end +
+        'border-radius:' + 
+        if $9.nil? then '' else $9 end + 'px;">'
       loop do
         index += 1
         if /#{$endDivMark}/ =~ output[index] then
@@ -105,6 +119,7 @@ end #def
  
 module_function :calcSectionNo
 module_function :prePaling
+module_function :isDigit
 module_function :postPaling
 #############################################################################
 end
