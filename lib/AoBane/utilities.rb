@@ -52,7 +52,7 @@ def postPaling(text)
   output = text.split("\n")
   output.each_with_index{|line,index|
     if /#{$startDivMark}/ =~ line then
-      output[index] = '<div style="border:' + $1 + 'px ' + $2 + ';' +
+      output[index] = '<div style="line-height:50%;border:' + $1 + 'px ' + $2 + ';' +
         if $4.nil? then '' else 'width:' + if Utilities::isDigit($4) then $4 + 'px;' else $4 + ';'  end end  + 
         if $6.nil? then '' else 'height:' + if Utilities::isDigit($6) then $6 + 'px;' else $6 + ';' end end + 
         if $8.nil? then '' else 'background-color:' + $8 + ';' end +

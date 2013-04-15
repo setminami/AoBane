@@ -503,89 +503,93 @@ module AoBane
 		### it. The parameter is for compatibility with RedCloth, and is currently
 		### unused, though that may change in the future.
 		def parse_text(source, rs = nil)
-			rs ||= RenderState.new
-
-			# check
-			case rs.header_id_type
+                  rs ||= RenderState.new
+                  
+                  # check
+                  case rs.header_id_type
 			when HeaderIDType::MD5, HeaderIDType::ESCAPE
 			else
-				rs.warnings << "illegal header id type - #{rs.header_id_type}"
+                          rs.warnings << "illegal header id type - #{rs.header_id_type}"
 			end
+                  
+                  # Create a StringScanner we can reuse for various lexing tasks
+                  @scanner = StringScanner::new( '' )
+                  
+                  # Make a copy of the string with normalized line endings, tabs turned to
+                  # spaces, and a couple of guaranteed newlines at the end
+                  
+                  text = detab(source.gsub( /\r\n?/, "\n" ))
+                  text += "\n\n"
+                  @log.debug "Normalized line-endings: %p" % text
+                  
+                  #Insert by set.minami 2013-03-30
+                  text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(\/.*?)*\)/){|match|
+                    '<font color="' +
+                    if $2.nil? then '' else $2 end	+'" ' +
+                    'face="' +
+                    if $3.nil? then '' else $3.delete('|') end + '" ' +
+                    'size="' +
+                    if $4.nil? then '' else $4.delete('/') end + '">' +
+                    $1 + '</font>'
+                  }
+                  #Insert by set.minami 2013-04-13
+                  text = Utilities::prePaling(text)
 
-			# Create a StringScanner we can reuse for various lexing tasks
-			@scanner = StringScanner::new( '' )
-
-			# Make a copy of the string with normalized line endings, tabs turned to
-			# spaces, and a couple of guaranteed newlines at the end
-
-			text = detab(source.gsub( /\r\n?/, "\n" ))
-			text += "\n\n"
-			@log.debug "Normalized line-endings: %p" % text
-
-			#Insert by set.minami 2013-03-30
-			text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(\/.*?)*\)/){|match|
-			'<font color="' +
-			if $2.nil? then '' else $2 end	+'" ' +
-			'face="' +
-			if $3.nil? then '' else $3.delete('|') end + '" ' +
-			'size="' +
-			if $4.nil? then '' else $4.delete('/') end + '">' +
-			$1 + '</font>'
-			}
-                        #Insert by set.minami 2013-04-13
-                        text = Utilities::prePaling(text)
-
-			#Insert by set.minami 2013-04-03
-			nrange = []
-                        departure = 1
-                        preproc = Marshal.load(Marshal.dump(text))
-                        text.clear
-                        texParser = MathML::LaTeX::Parser.new
-                        html_text_number = 0
-			preproc.lines { |line|
-                        html_text_number += 1
-			begin
-			  line.gsub!(/^\{nrange:(.*?)(;\d+){0,1}\}/){ |match|
-                            depNum = $2.delete(';').to_i
-                            departure =  
-                                if depNum > 0 then depNum else 1 end
-			    if /[hH]([1-6])\-[hH]([1-6])/ =~ $1
-			      nrange.push($1)
-			      nrange.push($2)
-                              if nrange.size > 2 then
-                                nrange.pop
-                                nrange.pop
-                                raise "Syntax Error!" 
-                              end
-			    end
-			    next
-                          }
-                          #Insert by set.minami 2013-04-01
-                          texTag = '\\\\TeX'
-                          line.gsub!(/#{texTag}\{(.+?)#{texTag}\}/){
-                            texParser.parse($1,false).to_s
-                          }
-                          @log.debug line                          
-                          #calculate numbering
-                          range = nrange[1].to_i - nrange[0].to_i
-                          if range == 0 then range = 1 end
-                          if range < 0 then 
-                            p "AoBane Syntax Error:Header range is WRONG!" +
-                              "@ l.#{html_text_number}";exit(-1)
-                            raise FatalError,"AoBane Syntax Error:Header range is WRONG!"
-                          end
-                          line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
-                            line = Utilities.
-                              calcSectionNo(nrange.min,range,$1.size,departure,$2)
-                          }
-                       text << line
-                       @log.debug nrange.minmax
-                       rescue => e
-                          @log.warn "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
-                          @log.warn e                          
-                       end
+                  #Insert by set.minami 2013-04-01
+                  text.gsub!(/\\TeX\{(.+?)\\TeX\}/){
+                    begin
+                      $1.to_mathml
+                    rescue => e
+                      puts 'math_ml Error: ' + $1
+                      puts e
+                    end
                   }
 
+                  #Insert by set.minami 2013-04-03
+                  nrange = []
+                  departure = 1
+                  preproc = Marshal.load(Marshal.dump(text))
+                  text.clear
+                  html_text_number = 0
+                  preproc.lines { |line|
+                    html_text_number += 1
+                    begin
+                      line.gsub!(/^\{nrange:(.*?)(;\d+){0,1}\}/){ |match|
+                        depNum = $2.delete(';').to_i
+                        departure =  
+                        if depNum > 0 then depNum else 1 end
+                        if /[hH]([1-6])\-[hH]([1-6])/ =~ $1
+                          nrange.push($1)
+                          nrange.push($2)
+                          if nrange.size > 2 then
+                            nrange.pop
+                            nrange.pop
+                            raise "Syntax Error!" 
+                          end
+                        end
+                        next
+                      }
+                      @log.debug line                          
+                      #calculate numbering
+                      range = nrange[1].to_i - nrange[0].to_i
+                      if range == 0 then range = 1 end
+                      if range < 0 then 
+                        p "AoBane Syntax Error:Header range is WRONG!" +
+                          "@ l.#{html_text_number}";exit(-1)
+                        raise FatalError,"AoBane Syntax Error:Header range is WRONG!"
+                      end
+                      line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
+                        line = Utilities.
+                        calcSectionNo(nrange.min,range,$1.size,departure,$2)
+                      }
+                      text << line
+                      @log.debug nrange.minmax
+                       rescue => e
+                      @log.warn "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
+                      @log.warn e                          
+                    end
+                  }
+                  
                   #Insert by set.minami
 
 			# Filter HTML if we're asked to do so
