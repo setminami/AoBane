@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.6'
-	VERSION_NUMBER = 0.0106
-	RELEASE_DATE = '2013-04-15'
+	VERSION = '0.1.7'
+	VERSION_NUMBER = 0.0107
+	RELEASE_DATE = '2013-04-17'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -659,60 +659,54 @@ module AoBane
                   text = Utilities::postPaling(text)
                   
                   #Insert by set.minami 2013-03-30
-                  output = []
-                  text.lines {|line|
-                    if /<pre><code>/ =~ line then
-                      output << line
-                      next
-                      until /<\/code><\/pre>/ =~ line
-                        output << line
-                        next
-                      end
-                    else
-                      line.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
+                  output = text.split("\n")
+                  output.each_with_index{|line,index|
+                    if /<\/pre>(.*?)<pre>|(.*)<pre>|<\/pre>(.*)/i =~ line then
+                      if $1.nil? then '' 
+                      else $1.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
 				     \>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|
 				     \\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in/,
-                                 "\-\-" => "&mdash;",
-                                 "<=" => "&hArr;",
-                                 "<\->" => "&harr;",
-                                 "\->" =>"&rarr;",
-                                 "<\-" =>"&larr;",
-                                 "=>" => "&rArr;",
-                                 "<=" => "&lArr;",
-                                 "\|\|\^" => "&uArr;",
-                                 "\|\|\/" => "&dArr;",
-                                 "\|\/" => "&darr;",
-                                 "\|\^" => "&uarr;",
-                                 ">>" => "&raquo;",
-                                 "\<\<" => "&laquo;",
-                                 "+_" => "&plusmn;",
-                                 "!=" => "&ne;",
-                                 "~~" => "&asymp;",
-                                 "~=" => "&cong;",
-                                 "<_" => "&le;",
-                                 ">_" => "&ge",
-                                 "\|FA" => "&forall;",
-                                 "\|EX" => "&exist;",
-                                 "\|=" => "&equiv;",
-                                 "\(+\)" => "&oplus",
-                                 "\(x\)" => "&otimes;",
-                                 "\\&" =>"&amp;",
-                                 "\(c\)" => "&copy;",
-                                 "\(R\)" =>"&reg;",
-                                 "\(SS\)" => "&sect;",
-                                 "\(TM\)" => "&trade;",
-                                 "!in" => "&notin;")
-                      output << line
+                              "\-\-" => "&mdash;",
+                              "<=" => "&hArr;",
+                              "<\->" => "&harr;",
+                              "\->" =>"&rarr;",
+                              "<\-" =>"&larr;",
+                              "=>" => "&rArr;",
+                              "<=" => "&lArr;",
+                              "\|\|\^" => "&uArr;",
+                              "\|\|\/" => "&dArr;",
+                              "\|\/" => "&darr;",
+                              "\|\^" => "&uarr;",
+                              ">>" => "&raquo;",
+                              "\<\<" => "&laquo;",
+                              "+_" => "&plusmn;",
+                              "!=" => "&ne;",
+                              "~~" => "&asymp;",
+                              "~=" => "&cong;",
+                              "<_" => "&le;",
+                              ">_" => "&ge",
+                              "\|FA" => "&forall;",
+                              "\|EX" => "&exist;",
+                              "\|=" => "&equiv;",
+                              "\(+\)" => "&oplus",
+                              "\(x\)" => "&otimes;",
+                              "\\&" =>"&amp;",
+                              "\(c\)" => "&copy;",
+                              "\(R\)" =>"&reg;",
+                              "\(SS\)" => "&sect;",
+                              "\(TM\)" => "&trade;",
+                              "!in" => "&notin;")
+                      end
                     end
-                  }
+                }
                   
-                  return output
-                  #Insert by set.minami
-                  #return text
-                  
-		end
-
-		alias parse parse_text
+                return output.join("\n")
+                #Insert by set.minami
+                #return text
+                
+              end
+              
+              alias parse parse_text
 
 		# return values are extended. (mainly for testing)
 		def parse_text_with_render_state(str, rs = nil)
