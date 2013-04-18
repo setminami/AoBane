@@ -17,8 +17,9 @@ $MAX_H = 6
 
 ###paling proccessing##########################################################
   $startDivMark = 
-    '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)(w=(\w+?)\s){0,1}(h=(\w+?)\s){0,1}(bg=(\w+?)\s){0,1}' + 
-    'rad=(\w+?)\-+\|'
+    '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)(w=(\w+?)\s){0,1}(h=(\w+?)\s){0,1}(bg=((#){0,1}\w+?)\s){0,1}' + 
+    '(lh=(\w+?)\s){0,1}' + 
+    'rad=(\d+?)\-+\|'
 $endDivMark =  '\|\-+\|'
 
 def prePaling(text)
@@ -30,9 +31,13 @@ def prePaling(text)
         if /#{$endDivMark}/ =~ output[index] then
           break
         elsif /^\|(\#{1,6})\s*(.*)\|/ =~ output[index] then
-          output[index] = '#'*$1.size + $2
+          output[index] = '#'*$1.size + $2           #pass through to BlueFeather
+        elsif /^(\s*)\*(\s.+?)/ =~ output[index] then
+          output[index] = $1 + '*' + $2              #pass through to BlueFeather
+        elsif /^(\s*)\-(\s.+?)/ =~ output[index] then
+          output[index] = $1 + '*' + $2              #pass through to BlueFeather
         elsif /^\|(.*)\s*\|/ =~ output[index] then
-          output[index] = '<p>' + $1 + '</p>'
+          output[index] =  $1
         end
     end
   end #if
@@ -52,12 +57,13 @@ def postPaling(text)
   output = text.split("\n")
   output.each_with_index{|line,index|
     if /#{$startDivMark}/ =~ line then
-      output[index] = '<div style="line-height:50%;border:' + $1 + 'px ' + $2 + ';' +
+      output[index] = '<div style="border:' + $1 + 'px ' + $2 + ';' +
         if $4.nil? then '' else 'width:' + if Utilities::isDigit($4) then $4 + 'px;' else $4 + ';'  end end  + 
         if $6.nil? then '' else 'height:' + if Utilities::isDigit($6) then $6 + 'px;' else $6 + ';' end end + 
-        if $8.nil? then '' else 'background-color:' + $8 + ';' end +
+        if $8.nil? then '' else 'background-color:' + $8 + ';' end + 
+        if $11.nil? then 'line-height:50%;' else 'line-height:' + $11 + ';' end +
         'border-radius:' + 
-        if $9.nil? then '' else $9 end + 'px;">'
+        if $12.nil? then '' else $12 end + 'px;">'
       loop do
         index += 1
         if /#{$endDivMark}/ =~ output[index] then
