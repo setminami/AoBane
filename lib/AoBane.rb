@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.7'
-	VERSION_NUMBER = 0.0107
-	RELEASE_DATE = '2013-04-17'
+	VERSION = '0.1.8'
+	VERSION_NUMBER = 0.0108
+	RELEASE_DATE = '2013-04-18'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -659,50 +659,66 @@ module AoBane
                   text = Utilities::postPaling(text)
                   
                   #Insert by set.minami 2013-03-30
-                  output = text.split("\n")
-                  output.each_with_index{|line,index|
-                    if /<\/pre>(.*?)<pre>|(.*)<pre>|<\/pre>(.*)/i =~ line then
-                      if $1.nil? then '' 
-                      else $1.gsub!(/\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|
-				     \>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|
-				     \\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in/,
-                              "\-\-" => "&mdash;",
-                              "<=" => "&hArr;",
-                              "<\->" => "&harr;",
-                              "\->" =>"&rarr;",
-                              "<\-" =>"&larr;",
-                              "=>" => "&rArr;",
-                              "<=" => "&lArr;",
-                              "\|\|\^" => "&uArr;",
-                              "\|\|\/" => "&dArr;",
-                              "\|\/" => "&darr;",
-                              "\|\^" => "&uarr;",
-                              ">>" => "&raquo;",
-                              "\<\<" => "&laquo;",
-                              "+_" => "&plusmn;",
-                              "!=" => "&ne;",
-                              "~~" => "&asymp;",
-                              "~=" => "&cong;",
-                              "<_" => "&le;",
-                              ">_" => "&ge",
-                              "\|FA" => "&forall;",
-                              "\|EX" => "&exist;",
-                              "\|=" => "&equiv;",
-                              "\(+\)" => "&oplus",
-                              "\(x\)" => "&otimes;",
-                              "\\&" =>"&amp;",
-                              "\(c\)" => "&copy;",
-                              "\(R\)" =>"&reg;",
-                              "\(SS\)" => "&sect;",
-                              "\(TM\)" => "&trade;",
-                              "!in" => "&notin;")
-                      end
-                    end
-                }
+                  #output = text.split("\n")
+                  specialChar =  {
+                    "\-\-" => "&mdash;",
+                    "<=" => "&hArr;",
+                    "<\->" => "&harr;",
+                    "\->" =>"&rarr;",
+                    "<\-" =>"&larr;",
+                    "=>" => "&rArr;",
+                    "<=" => "&lArr;",
+                    "\|\|\^" => "&uArr;",
+                    "\|\|\/" => "&dArr;",
+                    "\|\/" => "&darr;",
+                    "\|\^" => "&uarr;",
+                    ">>" => "&raquo;",
+                    "\<\<" => "&laquo;",
+                    "+_" => "&plusmn;",
+                    "!=" => "&ne;",
+                    "~~" => "&asymp;",
+                    "~=" => "&cong;",
+                    "<_" => "&le;",
+                    ">_" => "&ge",
+                    "\|FA" => "&forall;",
+                    "\|EX" => "&exist;",
+                    "\|=" => "&equiv;",
+                    "\(+\)" => "&oplus",
+                    "\(x\)" => "&otimes;",
+                    "\\&" =>"&amp;",
+                    "\(c\)" => "&copy;",
+                    "\(R\)" =>"&reg;",
+                    "\(SS\)" => "&sect;",
+                    "\(TM\)" => "&trade;",
+                    "!in" => "&notin;"}
                   
-                return output.join("\n")
+                  entry = '\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|\\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
+
+                  if text =~ /<pre>/ then
+                    text.gsub!(/<\/pre>(.*?)<pre>/i){|m|
+                      if m.nil? then '<\/pre><pre>'
+                      else
+                        '<\/pre>' + m.gsub!(/#{entry}/,specialChar).to_s + '<pre>'
+                      end
+                    }
+                    text.gsub!(/<\/pre>(.*?)/i){|m|
+                      if m.nil? then '<\/pre>'
+                      else
+                        '</pre>' + m.gsub!(/#{entry}/,specialChar).to_s
+                      end
+                    }
+                    text.gsub!(/(.*?)<pre>/i){|m|
+                      if m.nil? then '<pre>'
+                      else
+                        m.gsub!(/#{entry}/,specialChar).to_s + '<pre>'
+                      end
+                    }
+                  else 
+                    text.gsub!(/#{entry}/,specialChar)
+                  end
+                #return output.join("\n")
                 #Insert by set.minami
-                #return text
+                return text
                 
               end
               
