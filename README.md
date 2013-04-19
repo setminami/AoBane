@@ -2,7 +2,7 @@ AoBane The MarkDown Core Engine
 ======
 
 Powered By BlueFeather<br> 
-See also [AoBane development memo](https://github.com/setminami/AoBane/wiki/development-memo).
+See also [AoBane Syntax](https://github.com/setminami/AoBane/wiki/Details-of-AoBane-Syntax).
 
 ##What's This and What You Can...
 This codes are extended from BlueFeather.<br>
@@ -106,6 +106,38 @@ like this
 
 > !in &notin;
 
+<h2> 2.6 Table Caption</h2>
+Do you want to insert a caption to &lt;table&gt;? You can insert in AoBane. <br>
+Like this:<br>
+<pre><code>
+[foo]{#bar}
+|fruits|price
+|------|-----
+|Apple|$0.5
+|Orange|$0.3
+</code></pre>
+the first line [foo]{#bar} and this table, expands HTML as below:<br>
+<pre><code>
+&lt;table id="#bar"&gt;
+&lt;caption&gt;foo&lt;/caption&gt;
+	&lt;thead&gt;&lt;tr&gt;
+		&lt;th&gt;fruits&lt;/th&gt;
+		&lt;th&gt;price&lt;/th&gt;
+	&lt;/tr&gt;&lt;/thead&gt;
+	&lt;tbody&gt;
+		&lt;tr&gt;
+			&lt;td&gt;Apple&lt;/td&gt;
+			&lt;td&gt;$0.5&lt;/td&gt;
+		&lt;/tr&gt;
+		&lt;tr&gt;
+			&lt;td&gt;Orange&lt;/td&gt;
+			&lt;td&gt;$0.3&lt;/td&gt;
+		&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+</code></pre>
+The "#bar" is adapted to table id, and "foo" is surrounded by &lt;captin&gt; and &lt;/caption&gt; as elements in following table. When you put caption to a table, you should write `[Table 1](#Table1)` somewhere in your Markdown. So, you can jump to a table from the link. <br>
+Of course, you can omit this.
 
 ##How to Install
 Just try 
