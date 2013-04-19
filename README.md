@@ -96,8 +96,6 @@ like this
 
 > (x) &otimes;
 
-> `\&` &amp;
-
 > (c) &copy;
 
 > (R) &reg;

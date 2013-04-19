@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.9'
-	VERSION_NUMBER = 0.0109
-	RELEASE_DATE = '2013-04-19'
+	VERSION = '0.1.10'
+	VERSION_NUMBER = 0.0110
+	RELEASE_DATE = '2013-04-20'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -685,14 +685,13 @@ module AoBane
                     "\|=" => "&equiv;",
                     "\(+\)" => "&oplus",
                     "\(x\)" => "&otimes;",
-                    "\\&" =>"&amp;",
                     "\(c\)" => "&copy;",
                     "\(R\)" =>"&reg;",
                     "\(SS\)" => "&sect;",
                     "\(TM\)" => "&trade;",
                     "!in" => "&notin;"}
                   
-                  entry = '\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|\\&|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
+                  entry = '\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
 
                   if text =~ /<pre>/ then
                     text.gsub!(/<\/pre>(.*?)<pre>/i){|m|
@@ -1225,8 +1224,11 @@ module AoBane
 			}
 		end
 
+                CaptionRegexp = "\\[(.+?)\\](\\{\\#(.+?)\\}){0,1}"
 		TableRegexp = %r{
 			(?:
+                                (#{CaptionRegexp}\s*\n){0,1} 
+                                             # modified by set.minami 2013-04-20
 				^([ ]{0,#{TabWidth - 1}}) # not indented
 				(?:[|][ ]*)   # NOT optional border
 
@@ -1262,11 +1264,16 @@ module AoBane
 		}x
 
 		def transform_table_rows(str, rs)
-
+                        
 			# split cells to 2-d array
 			data = str.split("\n").map{|x| x.split('|')}
-
-
+                        caption = ''  #Inserted by set.minami 2013-04-20
+                        captionName = ''
+                        if /#{CaptionRegexp}/ =~ data[0][0] then
+                          caption = if $1.nil? then '' else $1 end
+                          captionName = if $3.nil? then '' else $3 end
+                          data.slice!(0)
+                        end   #Inserted by set.minami 2013-04-20
 			data.each do |row|
 				# cut left space
 				row.first.lstrip!
@@ -1277,8 +1284,14 @@ module AoBane
 
 			column_attrs = []
 
-			re = ''
-			re << "<table>\n"
+			re = ''                        
+                        re << if captionName == '' then 
+                                "<table>\n" 
+                              else 
+                                "<table id=\"#{captionName}\">\n"
+                              end
+                        re << "<caption>#{caption}</caption>\n" 
+                        #Insert by set.minami 2013-04-20
 
 			# head is exist?
 			if data.size >= 3 and data[1].all?{|x| x =~ TableSeparatorCellRegexp} then
