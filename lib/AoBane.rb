@@ -2026,28 +2026,28 @@ module AoBane
 
 			# Set up the string scanner and just return the string unless there's at
 			# least one backtick.
+
 			@scanner.string = str.dup
 			unless @scanner.exist?( /`/ )
 				@scanner.terminate
-				@log.debug "No backticks found for code span in %p" % str
+				@log.warn "No backticks found for code span in %p" % str
 				return str
 			end
 
 			@log.debug "Transforming code spans in %p" % str
-
 			# Build the transformed text anew
 			text = ''
-
+                        
 			# Scan to the end of the string
 			until @scanner.empty?
 
 				# Scan up to an opening backtick
 				if pre = @scanner.scan_until( /.??(?=`)/m )
 					text += pre
-					@log.debug "Found backtick at %d after '...%s'" % [ @scanner.pos, text[-10, 10] ]
+					@log.debug "Found backtick at %d after '...%s'" % [ @scanner.pos, text[-20, 20] ]
 
 					# Make a pattern to find the end of the span
-					opener = @scanner.scan( /`+/ )
+                                        opener = @scanner.scan( /`+/ )
 					len = opener.length
 					closer = Regexp::new( opener )
 					@log.debug "Scanning for end of code span with %p" % closer
@@ -2060,10 +2060,11 @@ module AoBane
 							"No %p found before end" % opener )
 
 					@log.debug "Found close of code span at %d: %p" % [ @scanner.pos - len, codespan ]
+                                        #p codespan.strip
 					codespan.slice!( -len, len )
 					text += "<code>%s</code>" %
 						encode_code( codespan.strip, rs )
-
+                                       
 				# If there's no more backticks, just append the rest of the string
 				# and move the scan pointer to the end
 				else
@@ -2170,6 +2171,7 @@ module AoBane
 				#gsub( %r{<}, '&lt;' ).
 				#gsub( %r{>}, '&gt;' ).
 				#gsub( CodeEscapeRegexp ) {|match| EscapeTable[match][:md5]}
+                  return str
 		end
 
 		def escape_to_header_id(str)
