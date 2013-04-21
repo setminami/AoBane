@@ -140,7 +140,7 @@ The "#bar" is adapted to table id, and "foo" is surrounded by &lt;captin&gt; and
 Of course, you can omit this.
 
 <h2> 2.7 Abbreviation </h2>
-Especially for not ASCII languagers, this function is need to study some more, perhaps about morphorogical analysis. So, if you use this, you have to be careful.
+Especially for not ASCII languagers, I need to study some more, perhaps about morphorogical analysis. So, if you use this function, you have to be careful.
 
 This function is implementation of [Abbreviations](http://michelf.ca/projects/php-markdown/extra/#abbr) specifies in PHP Markdown Extra. And my some Idea which can make a UTF-8 textfile as other file definitions of abbreviation is implemented. In this case, Markdown is wrote like this:
 <pre><code>
