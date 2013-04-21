@@ -139,6 +139,38 @@ the first line [foo]{#bar} and this table, expands HTML as below:<br>
 The "#bar" is adapted to table id, and "foo" is surrounded by &lt;captin&gt; and &lt;/caption&gt; as elements in following table. When you put caption to a table, you should write `[Table 1](#Table1)` somewhere in your Markdown. So, you can jump to a table from the link. <br>
 Of course, you can omit this.
 
+<h2> 2.7 Abbreviation </h2>
+Especially for not ASCII languagers, this function is need to study some more, perhaps about morphorogical analysis. So, if you use this, you have to be careful.
+
+This function is implementation of [Abbreviations](http://michelf.ca/projects/php-markdown/extra/#abbr) specifies in PHP Markdown Extra. And my some Idea which can make a UTF-8 textfile as other file definitions of abbreviation is implemented. In this case, Markdown is wrote like this:
+<pre><code>
+{abbrnote:./dicSample.txt}
+......
+</code></pre>
+And dicSample.txt in same directory with Markdown&mdash;you can name as you like&mdash;is like below:
+<pre><code>
+*[foo1]:bar
+*[foo2]:barbar
+*[foo3]:barbarbar
+......
+</code></pre>
+Because I set as this, you can create individual word set about your each Markdown files.And you may write like as:  
+<pre><code>
+{abbrnote:../share/dicSample.txt}
+......
+*[foo0]:foo
+</code></pre>
+And ../share/dicSample.txt is
+<pre><code>
+*[foo1]:bar
+*[foo2]:barbar
+*[foo3]:barbarbar
+......
+</code></pre>
+If You created files like this, you can controll a word set. For instance, foo0 is adapted only the above Markdown file, and foo1, foo2, foo3,...is adopted all Markdown files which is wrote <code>{abbrnote:../share/dicSample.txt}</code>. 
+
+Of course, you can use like PHP Markdown Extra. Incidentally,this function is not implemented on BlueFeather.
+
 ##How to Install
 Just try 
 `sudo gem install AoBane`

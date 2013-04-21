@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.11'
-	VERSION_NUMBER = 0.0111
-	RELEASE_DATE = '2013-04-20'
+	VERSION = '0.1.12'
+	VERSION_NUMBER = 0.0112
+	RELEASE_DATE = '2013-04-21'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -534,7 +534,8 @@ module AoBane
                   }
                   #Insert by set.minami 2013-04-13
                   text = Utilities::prePaling(text)
-
+                  #Insert by set.minami 2013-04-21
+                  text = Utilities::abbrPreProcess(text)
                   #Insert by set.minami 2013-04-01
                   text.gsub!(/\\TeX\{(.+?)\\TeX\}/){
                     begin
@@ -657,7 +658,8 @@ module AoBane
 
                   #Insert by Set.Minami 2013-04-13
                   text = Utilities::postPaling(text)
-                  
+                  #Insert by set.minami 2013-04-21
+                  text = Utilities::abbrPostProcess(text)
                   #Insert by set.minami 2013-03-30
                   #output = text.split("\n")
                   specialChar =  {

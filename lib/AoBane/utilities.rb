@@ -14,7 +14,55 @@ module Utilities
 $MAX_H = 6
 @@log = Logger.new(STDOUT)
 @@log.level = Logger::WARN
+###Abbreviation proccessing##########################################################
+  AbbrHashTable = Hash::new
+  AbbrPattern = '\*\[(.+?)\]:(.*)\s*$'
+def abbrPreProcess(text)
+  output = ''
+  if text.nil? then return '' end 
+  text.lines{ |line|
+    if line =~ /\{abbrnote:(.+?)\}/i then #1
+      p "*****"
+      if $1.nil? then '' #1.5
+      else 
+        File::open($1){|file| #2
+          file.each{|line| #3
+            if /^#.*\n/ =~ line then
+              next
+            elsif /#{AbbrPattern}/ =~ line 
+              storeAbbr($1,$2)
+            end
+          } #3
+        }
+        
+      end #1.5
+    elsif line =~ /#{AbbrPattern}/ then
+      @@log.debug $~
+      storeAbbr($1,$2)
+    else output << line
+    end #
+  }
+  
+  @@log.debug AbbrHashTable
+  return output
+end #def
 
+def storeAbbr(key,val)
+  val = if val.nil? then '' else val end
+  AbbrHashTable.store(key,val)
+end
+
+def abbrPostProcess(text)
+  if AbbrHashTable.size == 0 then return text 
+  else
+    keywords = AbbrHashTable.keys.join('|')
+    text.gsub!(/(#{keywords})/){
+      word = if $1.nil? then '' else $1 end
+      '<abbr title="' + AbbrHashTable[word] +'">' + word + '</abbr>' 
+    }
+    return text
+  end
+end
 ###paling proccessing##########################################################
   StartDivMark = 
     '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)' + 
@@ -125,7 +173,10 @@ end #def postPailing
     times = startNo.to_i + size.to_i - 1
   return  h*times + number + str
 end #def
- 
+
+module_function :abbrPreProcess
+module_function :abbrPostProcess
+module_function :storeAbbr
 module_function :calcSectionNo
 module_function :prePaling
 module_function :isDigit
