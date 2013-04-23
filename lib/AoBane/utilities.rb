@@ -4,6 +4,7 @@
 
 require 'logger'
 require 'singleton'
+require 'date'
 
 $S_SLOT = 0
 $N_SLOT = 1
@@ -14,6 +15,17 @@ module Utilities
 $MAX_H = 6
 @@log = Logger.new(STDOUT)
 @@log.level = Logger::WARN
+###Insert Timestamp#################################################################
+def insertTimeStamp(text)
+  text.gsub!(/\$date/i){
+    getNowTime
+  }
+end
+###get Now Timestamp#################################################################
+def getNowTime
+  return Time.now.to_s
+end
+
 ###Abbreviation proccessing##########################################################
   AbbrHashTable = Hash::new
   AbbrPattern = '\*\[(.+?)\]:(.*)\s*$'
@@ -22,7 +34,6 @@ def abbrPreProcess(text)
   if text.nil? then return '' end 
   text.lines{ |line|
     if line =~ /\{abbrnote:(.+?)\}/i then #1
-      p "*****"
       if $1.nil? then '' #1.5
       else 
         File::open($1){|file| #2
@@ -174,6 +185,8 @@ end #def postPailing
   return  h*times + number + str
 end #def
 
+module_function :getNowTime
+module_function :insertTimeStamp
 module_function :abbrPreProcess
 module_function :abbrPostProcess
 module_function :storeAbbr

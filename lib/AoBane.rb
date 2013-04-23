@@ -51,9 +51,9 @@ require 'AoBane/utilities'
 require 'math_ml/string'
 
 module AoBane
-	VERSION = '0.1.12'
-	VERSION_NUMBER = 0.0112
-	RELEASE_DATE = '2013-04-21'
+	VERSION = '0.1.13'
+	VERSION_NUMBER = 0.0113
+	RELEASE_DATE = '2013-04-23'
 	VERSION_LABEL = "#{VERSION} (#{RELEASE_DATE})"
 
 	UTF8_BOM = "\xef\xbb\xbf"
@@ -661,6 +661,7 @@ module AoBane
                   #Insert by set.minami 2013-04-21
                   text = Utilities::abbrPostProcess(text)
                   #Insert by set.minami 2013-03-30
+                  text = Utilities::insertTimeStamp(text)
                   #output = text.split("\n")
                   specialChar =  {
                     "\-\-" => "&mdash;",
