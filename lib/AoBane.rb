@@ -50,6 +50,7 @@ require 'uri'
 require 'AoBane/utilities'
 require 'math_ml/string'
 
+
 module AoBane
 	VERSION = '0.1.13'
 	VERSION_NUMBER = 0.0113
@@ -662,6 +663,7 @@ module AoBane
                   text = Utilities::abbrPostProcess(text)
                   #Insert by set.minami 2013-03-30
                   text = Utilities::insertTimeStamp(text)
+
                   #output = text.split("\n")
                   specialChar =  {
                     "\-\-" => "&mdash;",
@@ -696,7 +698,7 @@ module AoBane
                   
                   entry = '\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
 
-                  if text =~ /<pre>/ then
+                  if text =~ /<pre>/i then
                     text.gsub!(/<\/pre>(.*?)<pre>/i){|m|
                       if m.nil? then '<\/pre><pre>'
                       else
@@ -715,8 +717,10 @@ module AoBane
                         m.gsub!(/#{entry}/,specialChar).to_s + '<pre>'
                       end
                     }
-                  else 
-                    text.gsub!(/#{entry}/,specialChar)
+                  else
+                    if text.nil? then ''
+                    else text.gsub!(/#{entry}/,specialChar)
+                    end
                   end
                 #return output.join("\n")
                 #Insert by set.minami
@@ -729,7 +733,7 @@ module AoBane
 		# return values are extended. (mainly for testing)
 		def parse_text_with_render_state(str, rs = nil)
 			rs ||= RenderState.new
-			html = parse_text(str, rs)
+   			html = parse_text(str, rs)
 
 			return [html, rs]
 		end

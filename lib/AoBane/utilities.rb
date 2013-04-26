@@ -17,9 +17,12 @@ $MAX_H = 6
 @@log.level = Logger::WARN
 ###Insert Timestamp#################################################################
 def insertTimeStamp(text)
-  text.gsub!(/\$date/i){
-    getNowTime
-  }
+  if /\$date/i =~ text then
+    text.gsub!(/\$date/i){
+      getNowTime
+    }
+  else text 
+  end
 end
 ###get Now Timestamp#################################################################
 def getNowTime
@@ -185,15 +188,15 @@ end #def postPailing
   return  h*times + number + str
 end #def
 
-module_function :getNowTime
-module_function :insertTimeStamp
-module_function :abbrPreProcess
-module_function :abbrPostProcess
-module_function :storeAbbr
-module_function :calcSectionNo
-module_function :prePaling
-module_function :isDigit
-module_function :postPaling
+module_function:getNowTime
+module_function:insertTimeStamp
+module_function:abbrPreProcess
+module_function:abbrPostProcess
+module_function:storeAbbr
+module_function:calcSectionNo
+module_function:prePaling
+module_function:isDigit
+module_function:postPaling
 #############################################################################
 end
 
