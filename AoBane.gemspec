@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["set"]
   spec.email         = ["set.minami@gmail.com"]
   spec.description   = %q{AoBane The Markdown engine powered by BlueFeather}
-  spec.summary       = %q{You can write colored font without css and special characters with simple way.}
+  spec.summary       = %q{You can generate complex HTML with simple way.}
   spec.homepage      = "https://github.com/setminami/AoBane"
   spec.license       = "MIT"
 
