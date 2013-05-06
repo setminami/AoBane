@@ -15,6 +15,66 @@ module Utilities
 $MAX_H = 6
 @@log = Logger.new(STDOUT)
 @@log.level = Logger::WARN
+
+def transformSpecialChar(text)
+  #output = text.split("\n")
+  specialChar =  {
+    "\-\-" => "&mdash;",
+    "<=" => "&hArr;",
+    "<\->" => "&harr;",
+    "\->" =>"&rarr;",
+    "<\-" =>"&larr;",
+    "=>" => "&rArr;",
+    "<=" => "&lArr;",
+    "\|\|\^" => "&uArr;",
+    "\|\|\/" => "&dArr;",
+    "\|\/" => "&darr;",
+    "\|\^" => "&uarr;",
+    ">>" => "&raquo;",
+    "\<\<" => "&laquo;",
+    "+_" => "&plusmn;",
+    "!=" => "&ne;",
+    "~~" => "&asymp;",
+    "~=" => "&cong;",
+    "<_" => "&le;",
+    ">_" => "&ge",
+    "\|FA" => "&forall;",
+    "\|EX" => "&exist;",
+    "\|=" => "&equiv;",
+    "\(\+\)" => "&oplus;",
+    "\(\-\)" => "&ominus;",
+    "\(X\)" => "&otimes;",
+    "\(c\)" => "&copy;",
+    "\(R\)" =>"&reg;",
+    "\(SS\)" => "&sect;",
+    "\(TM\)" => "&trade;",
+    "!in" => "&notin;"}
+  
+  entry = '(?!\-+\|)\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|' +
+    '\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(\+\)|\(\-\)|\(X\)|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
+  
+  
+  
+  zoneofPre = ["<pre>","<\/pre>"] 
+  dup = []
+  doc = text.split("\n")
+  index = 0
+  doc.each{
+    if doc[index] =~ /#{zoneofPre[0]}/i
+      until doc[index] =~ /#{zoneofPre[1]}/i
+        dup[index] = doc[index]
+        index += 1
+      end
+      dup[index] = doc[index]
+    else
+      dup[index] = if !doc[index].nil? then doc[index].gsub(/#{entry}/,specialChar) end
+      index += 1
+    end
+  }
+  
+  #Insert by set.minami
+  return dup.join("\n")
+end
 ###Insert Timestamp#################################################################
 def insertTimeStamp(text)
   if /\$date/i =~ text then
@@ -78,37 +138,81 @@ def abbrPostProcess(text)
   end
 end
 ###paling proccessing##########################################################
-  StartDivMark = 
-    '\|\-:b=(\d+?)\s(\w+?\s\w+?\s)' + 
-    '(w=(\w+?)\s){0,1}' + 
-    '(h=(\w+?)\s){0,1}' + 
-    '(bg=((#){0,1}\w+?)\s){0,1}' + 
-    '(lh=([\w%]+?)\s){0,1}' + 
-    'rad=(\d+?)\-+\|'
-  EndDivMark =  '\|\-+\|'
+StartDivMark = 
+  '[\/\|]\-:b=(\d+?)\s(\w+?\s\w+?\s)' + # $1 $2
+  '(w=(\w+?)\s)??' +  # $3 $4
+  '(h=(\w+?)\s)??' +  # $5 $6
+  '(bg=((#)??\w+?)\s)??' + # $7 $8 $9
+  '(lh=([\w%]+?)\s)??' + # $10 $11
+  '(mg=(\d+?)\s)??' + # $12 $13
+  '(al=(\w+?)\s)??' + # $14 $15
+  '(rad=(\d+?))\-+[\|\/]' + # $16 $17
+  '({(.+?)})??' # $18 $19 
+EndDivMark =  '\|\_+\|'
+AllChar = '\w\s\!@\#\$%\^&\*\(\)\-\+=\[\{\}\];:\'"<>\,\.\/\?\\|'
+InnerRepresent = ["@","/"]
 
-def prePaling(text)
-  output = text.split("\n")
+def preProcFence(text,startPoint)
+  output = []
+  dup = []
+  isInFence = [false]
+  linePointer = 0
+  exclude = '(?!^\|_+|\|\-:)^\||^[#]{1,6}\s|^\s+\*|^\s+\-'
+  if !text.instance_of?(Array) then output = text.split("\n") else output = text end
+
   output.each_with_index{|line,index|
-    if /#{StartDivMark}/ =~ line then
-    loop do
-        index += 1
-        if /#{EndDivMark}/ =~ output[index] then
-          break
-        elsif /^\|(\#{1,6})\s*(.*)\|/ =~ output[index] then
-          output[index] = '#'*$1.size + $2           #pass through to BlueFeather
-        elsif /^\|(\s*)\*(\s.+?)\s*\|/ =~ output[index] then
-          output[index] = $1 + '*' + $2              #pass through to BlueFeather
-        elsif /^\|(\s*)\-(\s.+?)\s*\|/ =~ output[index] then
-          output[index] = $1 + '-' + $2              #pass through to BlueFeather
-        elsif /^\|(.*\s*)\|/ =~ output[index] then
-          output[index] =  $1
+    if index < startPoint then next
+    elsif /#{StartDivMark}/ =~ line then
+      start = line.split("|")
+      dup <<  "/" + start[1] + "/" 
+      if start.size >= 2 then dup << start[2..-1] end 
+      isInFence.push(true)
+      next
+    elsif /#{EndDivMark}/ =~ line then
+      dup << '/@/'
+      next
+    else 
+      if isInFence.last then
+        if dup.last.nil? then 
+          dup << compressWSpaces(line)
+        else 
+          if dup.last =~ /#{exclude}/i || line =~ /#{exclude}/i then
+            if line =~ /#{exclude}/i then dup << line
+            else dup << compressWSpaces(line) end
+           else
+            if line == "" then 
+              dup << '<br />'
+            else 
+              dup.last << compressWSpaces(line)
+              next
+            end
+          end
         end
+      else
+        dup << if !line.nil? then line else "" end
+      end     
     end
-  end #if
   }
-  return output.join("\n")
-end #def prePaling
+  return dup
+end
+
+def compressWSpaces(line)
+  dup = if line =~ /\s+$/ then line.strip + " " else line end
+  return dup
+end
+
+
+# Pattern to match strong emphasis in Markdown text
+BoldRegexp = %r{ (\*\*) (\S|\S.*?\S) \1 }x
+
+# Pattern to match normal emphasis in Markdown text
+ItalicRegexp = %r{ (\*) (\S|\S.*?\S) \1 }x
+
+def italic_and_bold(str)
+  str.
+    gsub( BoldRegexp, %{<strong>\\2</strong>} ).
+    gsub( ItalicRegexp, %{<em>\\2</em>} )
+end
 
 def isDigit(str)
   if /\d+/ =~ str then 
@@ -118,7 +222,7 @@ def isDigit(str)
   end
 end
 
-def postPaling(text)
+def postProcFence(text)
   output = text.split("\n")
   output.each_with_index{|line,index|
     if /#{StartDivMark}/ =~ line then
@@ -127,22 +231,33 @@ def postPaling(text)
         if $6.nil? then '' else 'height:' + if Utilities::isDigit($6) then $6 + 'px;' else $6 + ';' end end + 
         if $8.nil? then '' else 'background-color:' + $8 + ';' end + 
         if $11.nil? then 'line-height:100%;' else 'line-height:' + $11 + ';' end +
+        if $13.nil? then '' else 'margin:' + $13 + 'px;' end +
+        if $15.nil? then '' else 'text-align:' + $15 + ';' end +
         'border-radius:' + 
-        if $12.nil? then '' else $12 end + 'px;">'
-      loop do
-        index += 1
-        if /#{EndDivMark}/ =~ output[index] then
-          output[index] = '</div>'
+        if $16.nil? then '' else $16 end + 'px;"' + 
+        if $19.nil? then '' else 'class="#{$19}"' end + 
+        '>'
+      output.each_with_index{|l,i = index|
+        if /\/@\// =~ l then
+          output[i] = '</div>'
+          index = i
           break
         end
-      end
+        i += 1
+      }
     end
   }
   return output.join("\n")
-end #def postPailing
+end #def postProcFence
+
+### Initialize a Stack class ############################
+  def initNumberStack
+    Stack.destroy
+  end
+
 ### Return a caluculated section number and string.############################
-  def calcSectionNo(startNo=1, range=0, size=0, dep=1, str='')
-    stack = Stack.instance
+  def calcSectionNo(startNo=1, range=0, size=0, dep=1, str='', outerStack)
+    stack = outerStack #Stack.instance
     i = dep.to_i
     counter = 0
     numberStr = [["%",i,counter],["%%",i,counter],["%%%",i,counter],
@@ -154,25 +269,30 @@ end #def postPailing
       @@log.error("AoBane Syntax Error: Header shortage!") 
       raise SyntaxError,"Headder shortage!"
     else
-      (1..size).each_with_index{|k| #h1 to h6
-        @@log.debug "k #{k},hn #{headNo},s #{size},sN #{startNo},sos #{stack.sizeofStack}"
+      (1..headNo).each_with_index{|k| #h1 to h6
+        p k
        if (k < headNo) then
-         @@log.debug "+++ #{k},#{stack.sizeofStack}"
-         if k >= stack.sizeofStack  then
+         p "+++" # #{k},#{stack.sizeofStack}"
+         if k >= stack.size  then
            stack.push(numberStr[k])
          end
-       elsif (k == headNo) then 
-         if stack.sizeofStack == 0 then
+       elsif k == headNo then
+         p "---"
+         if stack.size == 0 then
            stack.push(numberStr[k-1])
          end
-         if (stack.evalStackTop[$S_SLOT].size > numberStr[k-1][$S_SLOT].size) then
-            stack.pop
+         if stack.last[$S_SLOT].size > numberStr[k-1][$S_SLOT].size then
+           loop do
+             stack.pop
+             if stack.last[$S_SLOT].size == numberStr[k-1][$S_SLOT].size then
+               break
+             end
+           end
          end
        else
-         @@log.debug "~~~~"
+         p "~~~~"
          stack.push(numberStr[k])
        end #if...elsif 
-      stack.dump
      }
 =begin
     else
@@ -181,22 +301,35 @@ end #def postPailing
     end #case
 =end
   end #if...else
-    @@log.debug "$$$$"
-    number = stack.insertNumber
+    p "$$$$" 
+    number = ""
+    stack.each { |item|
+      if item == stack.last then
+        item[$N_SLOT] += item[$C_SLOT]
+        item[$C_SLOT] = 1
+      end
+      number << (item[$N_SLOT]).to_s + '.'
+      @@log.debug number
+    }
+ 
     h = "#"
     times = startNo.to_i + size.to_i - 1
   return  h*times + number + str
 end #def
 
+module_function:compressWSpaces
+module_function:italic_and_bold
+module_function:transformSpecialChar
 module_function:getNowTime
 module_function:insertTimeStamp
 module_function:abbrPreProcess
 module_function:abbrPostProcess
 module_function:storeAbbr
+module_function:initNumberStack
 module_function:calcSectionNo
-module_function:prePaling
+module_function:preProcFence
 module_function:isDigit
-module_function:postPaling
+module_function:postProcFence
 #############################################################################
 end
 
@@ -234,16 +367,7 @@ class Stack
   end
 
   def insertNumber
-    str = ""
-    @stack.each { |item|
-      if isTopofStack(item) then
-        item[$N_SLOT] += item[$C_SLOT]
-        item[$C_SLOT] = 1
-      end
-      str << (item[$N_SLOT]).to_s + '.'
-      @@log.debug str
-    }
-    return str
+ #   return str
   end
   
   def evalStackTop
@@ -268,8 +392,14 @@ class Stack
     end
   end
 
-  def dump
+  def self.dump
     @@log.debug("Stack DUMP:#{@stack}")
+  end
+
+  def self.destroy
+    if @stack.nil? then @stack = [] else @stack.clear end
+    p @stack
+    @sp = 0
   end
 
 end

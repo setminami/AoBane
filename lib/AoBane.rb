@@ -523,44 +523,23 @@ module AoBane
                   text += "\n\n"
                   @log.debug "Normalized line-endings: %p" % text
                   
-                  #Insert by set.minami 2013-03-30
-                  text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(\/.*?)*\)/){|match|
-                    '<font color="' +
-                    if $2.nil? then '' else $2 end	+'" ' +
-                    'face="' +
-                    if $3.nil? then '' else $3.delete('|') end + '" ' +
-                    'size="' +
-                    if $4.nil? then '' else $4.delete('/') end + '">' +
-                    $1 + '</font>'
-                  }
-                  #Insert by set.minami 2013-04-13
-                  text = Utilities::prePaling(text)
-                  #Insert by set.minami 2013-04-21
-                  text = Utilities::abbrPreProcess(text)
-                  #Insert by set.minami 2013-04-01
-                  text.gsub!(/\\TeX\{(.+?)\\TeX\}/){
-                    begin
-                      $1.to_mathml
-                    rescue => e
-                      puts 'math_ml Error: ' + $1
-                      puts e
-                    end
-                  }
-
+                  #text = Utilities::prePaling(text) #Insert by set.minami 2013-04-27
                   #Insert by set.minami 2013-04-03
                   nrange = []
                   departure = 1
                   preproc = Marshal.load(Marshal.dump(text))
                   text.clear
+                  stack = []
                   html_text_number = 0
+#                  Utilities::initNumberStack
+
                   preproc.lines { |line|
                     html_text_number += 1
                     begin
-                      line.gsub!(/^\{nrange:(.*?)(;\d+){0,1}\}/){ |match|
-                        depNum = $2.delete(';').to_i
-                        departure =  
-                        if depNum > 0 then depNum else 1 end
-                        if /[hH]([1-6])\-[hH]([1-6])/ =~ $1
+                      line.gsub!(/^\{nrange:(.*?)(;\d+)??\}/){ |match|
+                        #depNum = $2.delete(';').to_i
+                        #departure = if depNum > 0 then depNum else 1 end
+                        if /h(\d)\-h(\d)/i =~ $1
                           nrange.push($1)
                           nrange.push($2)
                           if nrange.size > 2 then
@@ -580,18 +559,43 @@ module AoBane
                           "@ l.#{html_text_number}";exit(-1)
                         raise FatalError,"AoBane Syntax Error:Header range is WRONG!"
                       end
-                      line.gsub!(/^(%{1,#{range}})(.*?)\n$/){ |match|
-                        line = Utilities.
-                        calcSectionNo(nrange.min,range,$1.size,departure,$2)
-                      }
-                      text << line
+                      if line =~ /^(%{1,#{range}})(.*?)\n/ then
+                        text << Utilities.
+                          calcSectionNo(nrange.min,range,$1.size,departure,$2,stack) +
+                          "\n"
+                      else
+                        text << line
+                      end
                       @log.debug nrange.minmax
                        rescue => e
                       @log.warn "AoBane Syntax WARNING l.#{html_text_number}:#{line.chomp} haven't adopted" 
                       @log.warn e                          
                     end
                   }
-                  
+
+                  text.gsub!(/\*\[(.*?)\]\((.*?)(\|.*?)*(\/.*?)*\)/){|match|
+                    '<font color="' +
+                    if $2.nil? then '' else $2 end	+'" ' +
+                    'face="' +
+                    if $3.nil? then '' else $3.delete('|') end + '" ' +
+                    'size="' +
+                    if $4.nil? then '' else $4.delete('/') end + '">' +
+                    $1 + '</font>'
+                  }
+                  #Insert by set.minami 2013-04-21
+                  text = Utilities::abbrPreProcess(text)
+                  #Insert by set.minami 2013-04-01
+                  text.gsub!(/\\TeX\{(.+?)\\TeX\}/){
+                    begin
+                      $1.to_mathml
+                    rescue => e
+                      puts 'math_ml Error: ' + $1
+                      puts e
+                    end
+                  }
+
+                  text = Utilities::preProcFence(text,0).join("\n") #Insert by set.minami 2013-04-27
+                  #Insert by set.minami 2013-03-30                  
                   #Insert by set.minami
 
 			# Filter HTML if we're asked to do so
@@ -657,75 +661,15 @@ module AoBane
 				end
 			end
 
-                  #Insert by Set.Minami 2013-04-13
-                  text = Utilities::postPaling(text)
                   #Insert by set.minami 2013-04-21
                   text = Utilities::abbrPostProcess(text)
                   #Insert by set.minami 2013-03-30
                   text = Utilities::insertTimeStamp(text)
-
-                  #output = text.split("\n")
-                  specialChar =  {
-                    "\-\-" => "&mdash;",
-                    "<=" => "&hArr;",
-                    "<\->" => "&harr;",
-                    "\->" =>"&rarr;",
-                    "<\-" =>"&larr;",
-                    "=>" => "&rArr;",
-                    "<=" => "&lArr;",
-                    "\|\|\^" => "&uArr;",
-                    "\|\|\/" => "&dArr;",
-                    "\|\/" => "&darr;",
-                    "\|\^" => "&uarr;",
-                    ">>" => "&raquo;",
-                    "\<\<" => "&laquo;",
-                    "+_" => "&plusmn;",
-                    "!=" => "&ne;",
-                    "~~" => "&asymp;",
-                    "~=" => "&cong;",
-                    "<_" => "&le;",
-                    ">_" => "&ge",
-                    "\|FA" => "&forall;",
-                    "\|EX" => "&exist;",
-                    "\|=" => "&equiv;",
-                    "\(+\)" => "&oplus",
-                    "\(x\)" => "&otimes;",
-                    "\(c\)" => "&copy;",
-                    "\(R\)" =>"&reg;",
-                    "\(SS\)" => "&sect;",
-                    "\(TM\)" => "&trade;",
-                    "!in" => "&notin;"}
+                  text = Utilities::postProcFence(text) #Insert by set.minami 2013-04-27
                   
-                  entry = '\-\-|<=>|<\->|\->|<\-|=>|<=|\|\^|\|\|\/|\|\/|\^|\>\>|\<\<|\+_|!=|~~|~=|>_|<_|\|FA|\|EX|\|=|\(+\)|\(x\)|\(c\)|\(R\)|\(SS\)|\(TM\)|!in'
+                  text = Utilities::transformSpecialChar(text) #Insert by set.minami 2013-04-27
 
-                  if text =~ /<pre>/i then
-                    text.gsub!(/<\/pre>(.*?)<pre>/i){|m|
-                      if m.nil? then '<\/pre><pre>'
-                      else
-                        '<\/pre>' + m.gsub!(/#{entry}/,specialChar).to_s + '<pre>'
-                      end
-                    }
-                    text.gsub!(/<\/pre>(.*?)/i){|m|
-                      if m.nil? then '<\/pre>'
-                      else
-                        '</pre>' + m.gsub!(/#{entry}/,specialChar).to_s
-                      end
-                    }
-                    text.gsub!(/(.*?)<pre>/i){|m|
-                      if m.nil? then '<pre>'
-                      else
-                        m.gsub!(/#{entry}/,specialChar).to_s + '<pre>'
-                      end
-                    }
-                  else
-                    if text.nil? then ''
-                    else text.gsub!(/#{entry}/,specialChar)
-                    end
-                  end
-                #return output.join("\n")
-                #Insert by set.minami
-                return text
-                
+                  return text
               end
               
               alias parse parse_text
@@ -879,6 +823,7 @@ module AoBane
 
 			@log.debug "Applying block transforms to:\n  %p" % str
 			text = str
+                        
 			text = pretransform_fenced_code_blocks( text, rs )
 			text = pretransform_block_separators(text, rs)
 
@@ -1231,12 +1176,11 @@ module AoBane
 			}
 		end
 
-                CaptionRegexp = "\\[(.+?)\\](\\{\\#(.+?)\\}){0,1}"
+                CaptionRegexp = '\[(.+?)\](\{(.+?)\})??'
 		TableRegexp = %r{
 			(?:
-                                (#{CaptionRegexp}\s*\n){0,1} 
-                                             # modified by set.minami 2013-04-20
-				^([ ]{0,#{TabWidth - 1}}) # not indented
+                                (#{CaptionRegexp}\s*\n)??# modified by set.minami 2013-04-20
+				([ ]{0,#{TabWidth - 1}}) # not indented
 				(?:[|][ ]*)   # NOT optional border
 
 				\S.*?  # 1st cell content
@@ -1253,9 +1197,9 @@ module AoBane
 
 		# Transform tables.
 		def transform_tables(str, rs)
-			str.gsub(TableRegexp){
-				transform_table_rows($~[0], rs)
-			}
+                  str.gsub(TableRegexp){
+                    transform_table_rows($~[0], rs)
+                  }
 		end
 
 		TableSeparatorCellRegexp = %r{
@@ -1271,79 +1215,86 @@ module AoBane
 		}x
 
 		def transform_table_rows(str, rs)
-                        
-			# split cells to 2-d array
-			data = str.split("\n").map{|x| x.split('|')}
-                        caption = ''  #Inserted by set.minami 2013-04-20
-                        captionName = ''
-                        if /#{CaptionRegexp}/ =~ data[0][0] then
-                          caption = if $1.nil? then '' else $1 end
-                          captionName = if $3.nil? then '' else $3 end
-                          data.slice!(0)
-                        end   #Inserted by set.minami 2013-04-20
-			data.each do |row|
-				# cut left space
-				row.first.lstrip!
-
-				# cut when optional side-borders is included
-				row.shift if row.first.empty?
-			end
-
-			column_attrs = []
-
-			re = ''                        
-                        re << if captionName == '' then 
-                                "<table>\n" 
-                              else 
-                                "<table id=\"#{captionName}\">\n"
-                              end
-                        re << "<caption>#{caption}</caption>\n" 
-                        #Insert by set.minami 2013-04-20
-
-			# head is exist?
-			if data.size >= 3 and data[1].all?{|x| x =~ TableSeparatorCellRegexp} then
-				head_row = data.shift
-				separator_row = data.shift
-
-				separator_row.each do |cell|
-					cell.match TableSeparatorCellRegexp
-					left = $1; right = $2
-
-					if left and right then
-						column_attrs << ' style="text-align: center"'
-					elsif right then
-						column_attrs << ' style="text-align: right"'
-					elsif left then
-						column_attrs << ' style="text-align: left"'
-					else
-						column_attrs << ''
-					end
-				end
-
-				re << "\t<thead><tr>\n"
-				head_row.each_with_index do |cell, i|
-					re << "\t\t<th#{column_attrs[i]}>#{apply_span_transforms(cell.strip, rs)}</th>\n"
-				end
-				re << "\t</tr></thead>\n"
-			end
-
-			# data row
-			re << "\t<tbody>\n"
-			data.each do |row|
-				re << "\t\t<tr>\n"
-				row.each_with_index do |cell, i|
-					re << "\t\t\t<td#{column_attrs[i]}>#{apply_span_transforms(cell.strip, rs)}</td>\n"
-				end
-				re << "\t\t</tr>\n"
-			end
-			re << "\t</tbody>\n"
-
-			re << "</table>\n"
-
-			re
+                  # split cells to 2-d array
+                  data = str.split("\n").map{|x| x.split('|')}
+                  caption = ''  #Inserted by set.minami 2013-04-20
+                  captionName = ''
+                  if /#{CaptionRegexp}/ =~ data[0].first then
+                    caption = if $1.nil? then '' else $1 end
+                    captionName = if $3.nil? then '' else $3 end
+                    data.shift
+                  end   #Inserted by set.minami 2013-04-20
+                  data.each do |row|
+                    if row.first.nil? then next end
+                    # cut left space
+                    row.first.lstrip! 
+                    
+                    # cut when optional side-borders is included
+                    row.shift if row.first.empty?
+                  end
+                  
+                  column_attrs = []
+                  
+                  re = ''                        
+                  re << if captionName == '' then 
+                          "<table>\n" 
+                        else 
+                          "<table id=\"#{captionName}\">\n"
+                        end
+                  re << "<caption>#{caption}</caption>\n" 
+                  #Insert by set.minami 2013-04-20
+                  
+                  # head is exist?
+                  
+                  #if !data[1].nil? && data[1].last =~ /\s+/ then
+                  ###  p data
+                  #  data.each{|d|
+                  #    d.pop
+                  #  }
+                  #end #Insert by set.minami @ 2013-04-29
+                  if data.size >= 3 and data[1].all?{|x| x =~ TableSeparatorCellRegexp} then
+                    head_row = data.shift
+                    separator_row = data.shift
+                    
+                    separator_row.each do |cell|
+                      cell.match TableSeparatorCellRegexp
+                      left = $1; right = $2
+                      
+                      if left and right then
+                        column_attrs << ' style="text-align: center"'
+                      elsif right then
+                        column_attrs << ' style="text-align: right"'
+                      elsif left then
+                        column_attrs << ' style="text-align: left"'
+                      else
+                        column_attrs << ''
+                      end
+                    end
+                    
+                    re << "\t<thead><tr>\n"
+                    head_row.each_with_index do |cell, i|
+                      re << "\t\t<th#{column_attrs[i]}>#{apply_span_transforms(cell.strip, rs)}</th>\n"
+                    end
+                    re << "\t</tr></thead>\n"
+                  end
+                  
+                  # data row
+                  re << "\t<tbody>\n"
+                  data.each do |row|
+                    re << "\t\t<tr>\n"
+                    row.each_with_index do |cell, i|
+                      re << "\t\t\t<td#{column_attrs[i]}>#{apply_span_transforms(cell.strip, rs)}</td>\n"
+                    end
+                    re << "\t\t</tr>\n"
+                  end
+                  re << "\t</tbody>\n"
+                  
+                  re << "</table>\n"
+                  
+                  re
 		end
 
-
+                
 		### Transform any Markdown-style horizontal rules in a copy of the specified
 		### +str+ and return it.
 		def transform_hrules( str, rs )
