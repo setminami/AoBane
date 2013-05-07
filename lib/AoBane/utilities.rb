@@ -156,7 +156,7 @@ def preProcFence(text,startPoint)
   output = []
   dup = []
   isInFence = [false]
-  linePointer = 0
+  isInPre = false
   exclude = '(?!^\|_+|\|\-:)^\||^[#]{1,6}\s|^\s+\*|^\s+\-'
   if !text.instance_of?(Array) then output = text.split("\n") else output = text end
 
@@ -182,8 +182,14 @@ def preProcFence(text,startPoint)
            else
             if line == "" then 
               dup << '<br />'
-            else 
-              dup.last << compressWSpaces(line)
+            else
+              if line =~ /<pre>|<\/pre>/ || isInPre then
+                isInPre = true
+                dup <<  line
+                if line =~ /<\/pre>/ then isInPre = false end
+              else
+                dup.last << compressWSpaces(line)
+              end
               next
             end
           end
