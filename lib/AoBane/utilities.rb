@@ -234,7 +234,7 @@ def postProcFence(text)
         if $13.nil? then '' else 'margin:' + $13 + 'px;' end +
         if $15.nil? then '' else 'text-align:' + $15 + ';' end +
         'border-radius:' + 
-        if $16.nil? then '' else $16 end + 'px;"' + 
+        if $17.nil? then '' else $17 end + 'px;"' + 
         if $19.nil? then '' else 'class="#{$19}"' end + 
         '>'
       output.each_with_index{|l,i = index|
