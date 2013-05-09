@@ -525,6 +525,7 @@ module AoBane
                   
                   #text = Utilities::prePaling(text) #Insert by set.minami 2013-04-27
                   #Insert by set.minami 2013-04-03
+                  text = transform_block_quotes(text, rs)
                   nrange = []
                   departure = 1
                   preproc = Marshal.load(Marshal.dump(text))
@@ -666,7 +667,7 @@ module AoBane
                   #Insert by set.minami 2013-03-30
                   text = Utilities::insertTimeStamp(text)
                   text = Utilities::postProcFence(text) #Insert by set.minami 2013-04-27
-                  
+
                   text = Utilities::transformSpecialChar(text) #Insert by set.minami 2013-04-27
 
                   return text
